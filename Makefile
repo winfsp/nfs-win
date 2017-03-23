@@ -24,19 +24,19 @@ $(Status)/done: $(Status)/dist
 
 $(Status)/dist: $(Status)/wix
 	mkdir -p $(DistDir)
-	cp $(shell cygpath -aw $(WixDir)/sshfs-win-$(MyVersion).msi) $(DistDir)
+	cp $(shell cygpath -aw $(WixDir)/nfs-win-$(MyVersion).msi) $(DistDir)
 	touch $(Status)/dist
 
-$(Status)/wix: $(Status)/sshfs-win
+$(Status)/wix: $(Status)/nfs-win
 	mkdir -p $(WixDir)
-	cp sshfs-win.wxs $(WixDir)/
+	cp nfs-win.wxs $(WixDir)/
 	candle -nologo -arch x86 -pedantic\
 		-dMyProductName=$(MyProductName)\
 		-dMyCompanyName=$(MyCompanyName)\
 		-dMyDescription=$(MyDescription)\
 		-dMyVersion=$(MyVersion)\
-		-o "$(shell cygpath -aw $(WixDir)/sshfs-win.wixobj)"\
-		"$(shell cygpath -aw $(WixDir)/sshfs-win.wxs)"
+		-o "$(shell cygpath -aw $(WixDir)/nfs-win.wixobj)"\
+		"$(shell cygpath -aw $(WixDir)/nfs-win.wxs)"
 	heat dir $(shell cygpath -aw $(RootDir))\
 		-nologo -dr INSTALLDIR -cg C.Main -srd -ke -sreg -gg -sfrag\
 		-o $(shell cygpath -aw $(WixDir)/root.wxs)
@@ -48,17 +48,17 @@ $(Status)/wix: $(Status)/sshfs-win
 		-o "$(shell cygpath -aw $(WixDir)/root.wixobj)"\
 		"$(shell cygpath -aw $(WixDir)/root.wxs)"
 	light -nologo\
-		-o $(shell cygpath -aw $(WixDir)/sshfs-win-$(MyVersion).msi)\
+		-o $(shell cygpath -aw $(WixDir)/nfs-win-$(MyVersion).msi)\
 		-ext WixUIExtension\
 		-b $(RootDir)\
 		$(shell cygpath -aw $(WixDir)/root.wixobj)\
-		$(shell cygpath -aw $(WixDir)/sshfs-win.wixobj)
+		$(shell cygpath -aw $(WixDir)/nfs-win.wixobj)
 	touch $(Status)/wix
 
-$(Status)/sshfs-win: $(Status)/root sshfs-win.c
-	gcc -o $(RootDir)/bin/sshfs-win sshfs-win.c
-	strip $(RootDir)/bin/sshfs-win
-	touch $(Status)/sshfs-win
+$(Status)/nfs-win: $(Status)/root nfs-win.c
+	gcc -o $(RootDir)/bin/nfs-win nfs-win.c
+	strip $(RootDir)/bin/nfs-win
+	touch $(Status)/nfs-win
 
 $(Status)/root: $(Status)/make
 	mkdir -p $(RootDir)/{bin,dev/{mqueue,shm},etc}

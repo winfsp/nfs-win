@@ -1,0 +1,45 @@
+diff --git a/fuse/fuse-nfs.c b/fuse/fuse-nfs.c
+index 9eb6f6e..70d3be3 100755
+--- a/fuse/fuse-nfs.c
++++ b/fuse/fuse-nfs.c
+@@ -499,6 +499,9 @@ int main(int argc, char *argv[])
+ 		{ "readdir_ino", required_argument, 0, 'Q' },
+ 		{ "multithread", required_argument, 0, 't' },
+ 		{ "read_only", no_argument, 0, 'O' },
++		/*winfsp-fuse options*/
++		{ "rellinks", required_argument, 0, 0x100 * 'r' + 'l' },
++		{ "VolumePrefix", required_argument, 0, 0x100 * 'V' + 'P' },
+ 		{ NULL, 0, 0, 0 }
+ 	};
+ 
+@@ -523,6 +526,7 @@ int main(int argc, char *argv[])
+ 	char fuse_attr_timeout_arg[32];
+ 	char fuse_ac_attr_timeout_arg[32];
+ 	char fuse_intr_signal_arg[32];
++	char fuse_VolumePrefix_arg[256];
+ 
+ 	struct nfs_url *urls = NULL;
+ 
+@@ -691,6 +695,13 @@ int main(int argc, char *argv[])
+ 	        case 'O':
+ 			fuse_nfs_argv[fuse_nfs_argc++] = "-oro";
+ 			break;
++		case 0x100 * 'r' + 'l':
++			fuse_nfs_argv[fuse_nfs_argc++] = "-orellinks";
++			break;
++		case 0x100 * 'V' + 'P':
++			snprintf(fuse_VolumePrefix_arg, sizeof(fuse_VolumePrefix_arg), "--VolumePrefix=%s", strdup(optarg));
++			fuse_nfs_argv[fuse_nfs_argc++] = fuse_VolumePrefix_arg;
++			break;
+ 		}
+ 	}
+ 
+@@ -725,7 +736,7 @@ int main(int argc, char *argv[])
+ 	/* Set default fsname if not defined */
+ 	if (!strstr(fuse_fsname_arg, "-ofsname="))
+ 	{
+-		snprintf(fuse_fsname_arg, sizeof(fuse_fsname_arg), "-ofsname=%s", url);
++		snprintf(fuse_fsname_arg, sizeof(fuse_fsname_arg), "-ofstypename=%s", url);
+ 		fuse_nfs_argv[fuse_nfs_argc++] = fuse_fsname_arg;
+ 	}
+ 
