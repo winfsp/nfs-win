@@ -1,0 +1,23 @@
+diff --git a/configure.ac b/configure.ac
+index b865ee0..864a767 100755
+--- a/configure.ac
++++ b/configure.ac
+@@ -51,12 +51,12 @@ AC_SEARCH_LIBS([fuse_get_context], [fuse dokanfuse1.dll], [], [
+   AC_MSG_ERROR([fuse library unavailable])
+ ])
+ 
+-OLD_LIBS=$LIBS
+-LIBS+=" -lws2"
+-AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <winsock2.h>]], [[gethostbyname ("");]])], [], [LIBS=$OLD_LIBS])
+-OLD_LIBS=$LIBS
+-LIBS+=" -lws2_32"
+-AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <winsock2.h>]], [[gethostbyname ("");]])], [], [LIBS=$OLD_LIBS])
++#OLD_LIBS=$LIBS
++#LIBS+=" -lws2"
++#AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <winsock2.h>]], [[gethostbyname ("");]])], [], [LIBS=$OLD_LIBS])
++#OLD_LIBS=$LIBS
++#LIBS+=" -lws2_32"
++#AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <winsock2.h>]], [[gethostbyname ("");]])], [], [LIBS=$OLD_LIBS])
+ 
+ #output
+ AC_CONFIG_FILES([Makefile]
