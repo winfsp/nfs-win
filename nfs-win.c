@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
     snprintf(remote, sizeof remote, "nfs://%s", instance);
 
-    snprintf(uidmap, sizeof uidmap, "--uid=-1");
+    snprintf(uidmap, sizeof uidmap, "--uid=11"); /* Authenticated Users */
     snprintf(gidmap, sizeof gidmap, "--gid=-1");
     if (0 != locuser)
     {
