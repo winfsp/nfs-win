@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product
+        Id="*"
+        Name="$(var.MyProductName)"
+        Manufacturer="$(var.MyCompanyName)"
+        Version="$(var.MyVersion)"
+        Language="1033"
+        UpgradeCode="B3947C60-7ACC-4A63-96A4-D759CC40FB8E">
+
+        <Package
+            Description="$(var.MyProductName) - $(var.MyDescription)"
+            InstallerVersion="200"
+            Compressed="yes"
+            InstallScope="perMachine" />
+        <MajorUpgrade
+            Disallow="yes"
+            AllowDowngrades="no"
+            AllowSameVersionUpgrades="no"
+            DisallowUpgradeErrorMessage="An older version of [ProductName] is already installed. You must uninstall it before you can install this version."
+            DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        <Media Id="1" Cabinet="nfs_win.cab" EmbedCab="yes" />
+
+        <Property Id="P.LauncherRegistryKey">Software\WinFsp\Services</Property>
+        <Property Id="P.RegistryKey">Software\$(var.MyProductName)</Property>
+        <Property Id="INSTALLDIR">
+            <RegistrySearch
+                Id="R.INSTALLDIR"
+                Root="HKLM"
+                Key="[P.RegistryKey]"
+                Name="InstallDir"
+                Type="raw" />
+        </Property>
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="INSTALLDIR" Name="$(var.MyProductName)" />
+            </Directory>
+        </Directory>
+
+        <DirectoryRef Id="INSTALLDIR">
+            <Component Id="C.INSTALLDIR" Guid="{98C13671-9B94-4668-99E7-43B8E2CC2593}">
+                <RegistryValue
+                    Root="HKLM"
+                    Key="[P.RegistryKey]"
+                    Name="InstallDir"
+                    Type="string"
+                    Value="[INSTALLDIR]"
+                    KeyPath="yes" />
+            </Component>
+            <Component Id="C.nfs_win.reg" Guid="{3CB2B802-1233-49D8-AEBD-268BE56022CF}">
+                <RegistryKey
+                    Root="HKLM"
+                    Key="[P.LauncherRegistryKey]">
+                    <RegistryKey
+                        Key="nfs">
+                        <RegistryValue
+                            Type="string"
+                            Name="Executable"
+                            Value="[INSTALLDIR]bin\nfs-win.exe"
+                            KeyPath="yes" />
+                        <RegistryValue
+                            Type="string"
+                            Name="CommandLine"
+                            Value="%1 %2" />
+                        <RegistryValue
+                            Type="string"
+                            Name="Security"
+                            Value="D:P(A;;RPWPLC;;;WD)" />
+                        <RegistryValue
+                            Type="integer"
+                            Name="JobControl"
+                            Value="1" />
+                    </RegistryKey>
+                </RegistryKey>
+            </Component>
+        </DirectoryRef>
+
+        <Feature
+            Id="F.Main"
+            Level="1"
+            Title="$(var.MyProductName) $(var.MyVersion)"
+            Description="$(var.MyDescription)"
+            Display="expand"
+            ConfigurableDirectory="INSTALLDIR"
+            AllowAdvertise="no"
+            InstallDefault="local"
+            Absent="disallow">
+            <ComponentRef Id="C.INSTALLDIR" />
+            <ComponentRef Id="C.nfs_win.reg" />
+            <ComponentGroupRef Id="C.Main" />
+        </Feature>
+
+        <UI Id="FeatureTree">
+            <UIRef Id="WixUI_FeatureTree" />
+            <!-- skip the license agreement dialog; higher Order takes priority (weird) -->
+            <Publish
+                Dialog="WelcomeDlg"
+                Control="Next"
+                Event="NewDialog"
+                Value="CustomizeDlg"
+                Order="10">NOT Installed</Publish>
+            <Publish
+                Dialog="CustomizeDlg"
+                Control="Back"
+                Event="NewDialog"
+                Value="WelcomeDlg"
+                Order="10">NOT Installed</Publish>
+        </UI>
+
+    </Product>
+</Wix>
