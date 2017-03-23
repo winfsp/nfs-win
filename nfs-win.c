@@ -3,8 +3,8 @@
 #include <pwd.h>
 #include <unistd.h>
 
-#define NFS_ARGS                        \
-    "-f",                               \
+#define EXEC_ARGS                       \
+    "--foreground",                     \
     "-orellinks",                       \
     "-ofstypename=NFS"                  \
 
@@ -25,17 +25,16 @@ static void pr_execl(const char *path, ...)
 
 int main(int argc, char *argv[])
 {
-    static const char *exename = "/bin/fuse-nfs.exe";
+    static const char *execname = "/bin/fuse-nfs.exe";
     static const char *environ[] =
     {
         "PATH=/bin",
         "CYGFUSE=WinFsp",
         0
     };
-#if 0
     struct passwd *passwd;
-    char idmap[64], volpfx[256], portopt[256], remote[256];
-    char *locuser, *userhost, *port, *path, *p;
+    char uidmap[32], gidmap[32], volpfx[256], remote[256];
+    char *instance, *locuser, *p;
 
     if (3 != argc)
         return 2;
@@ -47,7 +46,7 @@ int main(int argc, char *argv[])
         if ('\\' == *p)
             *p = '/';
 
-    /* skip class name (\\sshfs\) */
+    /* skip class name (\\nfs\) */
     p = argv[1];
     while ('/' == *p)
         p++;
@@ -55,46 +54,38 @@ int main(int argc, char *argv[])
         p++;
     while ('/' == *p)
         p++;
-
-    /* parse instance name (syntax: [locuser=]user@host!port) */
-    locuser = userhost = p;
-    port = "22";
-    while (*p && '/' != *p)
-    {
-        if ('=' == *p)
-            userhost = p + 1;
-        else if ('!' == *p)
-        {
-            *p = '\0';
-            port = p + 1;
-        }
-        p++;
-    }
-    if (*p)
-        *p++ = '\0';
-    path = p;
-
-    snprintf(portopt, sizeof portopt, "-oPort=%s", port);
-    snprintf(remote, sizeof remote, "%s:%s", userhost, path);
+    instance = p;
 
     /* get local user name */
-    p = locuser;
-    while (*p && '@' != *p && '=' != *p)
+    locuser = p;
+    while (*p && '@' != *p)
         p++;
-
-    snprintf(idmap, sizeof idmap, "-ouid=-1,gid=-1");
     if (*p)
     {
         *p = '\0';
+        instance = p + 1;
+    }
+    else
+        locuser = 0;
 
+    snprintf(remote, sizeof remote, "nfs://%s", instance);
+
+    snprintf(uidmap, sizeof uidmap, "--uid=-1");
+    snprintf(gidmap, sizeof gidmap, "--gid=-1");
+    if (0 != locuser)
+    {
         /* get uid/gid from local user name */
         passwd = getpwnam(locuser);
         if (0 != passwd)
-            snprintf(idmap, sizeof idmap, "-ouid=%d,gid=%d", passwd->pw_uid, passwd->pw_gid);
+        {
+            snprintf(uidmap, sizeof uidmap, "--uid=%d", passwd->pw_uid);
+            snprintf(gidmap, sizeof gidmap, "--gid=%d", passwd->pw_gid);
+        }
     }
 
-    execle(sshfs, sshfs, SSHFS_ARGS, idmap, volpfx, portopt, remote, argv[2], (void *)0, environ);
-#endif
+    execle(execname,
+        execname, EXEC_ARGS, uidmap, gidmap, volpfx, "-n", remote, "-m", argv[2], (void *)0,
+        environ);
 
     return 1;
 }
