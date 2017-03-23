@@ -1,0 +1,6 @@
+[submodule "libnfs"]
+	path = libnfs
+	url = https://github.com/sahlberg/libnfs.git
+[submodule "fuse-nfs"]
+	path = fuse-nfs
+	url = https://github.com/sahlberg/fuse-nfs.git
