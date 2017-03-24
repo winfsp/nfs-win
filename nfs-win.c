@@ -5,8 +5,8 @@
 
 #define EXEC_ARGS                       \
     "--foreground",                     \
-    "-orellinks",                       \
-    "-ofstypename=NFS"                  \
+    "--rellinks",                       \
+    "--fsname=NFS"                      \
 
 #if 0
 #define execle pr_execl
