@@ -33,8 +33,8 @@ int main(int argc, char *argv[])
         0
     };
     struct passwd *passwd;
-    char uidmap[32], gidmap[32], volpfx[256], remote[256];
-    char *instance, *locuser, *p;
+    char uidmap[32], gidmap[32], nfsuidmap[32], nfsgidmap[32], volpfx[256], remote[256];
+    char *locuser, *nfsuid, *nfsgid, *hostpath, *p;
 
     if (3 != argc)
         return 2;
@@ -54,24 +54,43 @@ int main(int argc, char *argv[])
         p++;
     while ('/' == *p)
         p++;
-    instance = p;
 
-    /* get local user name */
-    locuser = p;
-    while (*p && '@' != *p)
+    /* parse instance name (syntax: [[locuser=]uid@]host\path) */
+    hostpath = p;
+    locuser = nfsuid = nfsgid = 0;
+    while (*p && '@' != *p && '/' != *p)
         p++;
-    if (*p)
+    if ('@' == *p)
     {
         *p = '\0';
-        instance = p + 1;
+        nfsuid = hostpath;
+        hostpath = p + 1;
+
+        p = nfsuid;
+        while (*p && '=' != *p)
+            p++;
+        if ('=' == *p)
+        {
+            *p = '\0';
+            locuser = nfsuid;
+            nfsuid = p + 1;
+        }
     }
-    else
-        locuser = 0;
 
-    snprintf(remote, sizeof remote, "nfs://%s", instance);
+    if (0 != nfsuid)
+    {
+        p = nfsuid;
+        while (*p && '.' != *p)
+            p++;
+        if ('.' == *p)
+        {
+            *p = '\0';
+            nfsgid = p + 1;
+        }
+    }
 
-    snprintf(uidmap, sizeof uidmap, "--uid=11"); /* Authenticated Users */
-    snprintf(gidmap, sizeof gidmap, "--gid=-1");
+    snprintf(uidmap, sizeof uidmap, "--uid=11");    /* Authenticated Users */
+    snprintf(gidmap, sizeof gidmap, "--gid=65792"); /* Everyone */
     if (0 != locuser)
     {
         /* get uid/gid from local user name */
@@ -83,8 +102,13 @@ int main(int argc, char *argv[])
         }
     }
 
+    snprintf(nfsuidmap, sizeof nfsuidmap, "--fusenfs_uid=%s", nfsuid ? nfsuid : "65534");
+    snprintf(nfsgidmap, sizeof nfsgidmap, "--fusenfs_gid=%s", nfsgid ? nfsgid : "65534");
+
+    snprintf(remote, sizeof remote, "nfs://%s", hostpath);
+
     execle(execname,
-        execname, EXEC_ARGS, uidmap, gidmap, volpfx, "-n", remote, "-m", argv[2], (void *)0,
+        execname, EXEC_ARGS, uidmap, gidmap, nfsuidmap, nfsgidmap, volpfx, "-n", remote, "-m", argv[2], (void *)0,
         environ);
 
     return 1;

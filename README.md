@@ -8,15 +8,15 @@ NFS-Win requires the latest version of WinFsp to be installed; you can find it h
 
 Once you have installed WinFsp and NFS-Win you can start an NFS session to a remote computer using the following syntax:
 
-    \\nfs\host\path
+    \\nfs\[[locuser=]uid.gid@]host\path
 
 For example, you can map a network drive to `nfs://filebucket.local/DataVolume/billziss` by using the syntax:
 
     \\nfs\filebucket.local\DataVolume\billziss
 
-By default this will give permissions to all "Authenticated Users" on the new drive. If you want to restrict permissions to the user `billziss`, use this syntax:
+By default this will give permissions to all "Authenticated Users" on the new drive and login into the NFS server as the `nobody` user. If you want to restrict permissions to the user `billziss` and login as the NFS UID/GID 503/1000 , use this syntax:
 
-    \\nfs\billziss@filebucket.local\DataVolume\billziss
+    \\nfs\billziss=503.1000@filebucket.local\DataVolume\billziss
 
 You can use the Windows Explorer "Map Network Drive" functionality or you can use the `net use` command from the command line.
 
