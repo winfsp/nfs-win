@@ -2,7 +2,7 @@
 
 NFS-Win is a port of Ronnie Sahlberg's [fuse-nfs](https://github.com/sahlberg/fuse-nfs) project to Windows. Under the hood it uses [Cygwin](https://cygwin.com) for the POSIX environment and [WinFsp](https://github.com/billziss-gh/winfsp) for the FUSE functionality.
 
-NFS-Win requires the latest version of WinFsp to be installed; you can find it here: http://www.secfs.net/winfsp/download/. It does not require Cygwin to be installed, all the necessary files are included in the NFS-Win installer.
+NFS-Win requires the latest version of WinFsp to be installed; you can find it here: https://winfsp.dev/rel/. It does not require Cygwin to be installed, all the necessary files are included in the NFS-Win installer.
 
 ## How to use
 
